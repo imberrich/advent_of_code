@@ -1,17 +1,19 @@
+# run with `elixir freq.exs`
+
 defmodule FreqFinder do
 
   # {input list, current_freq, freq_list}
-  def finder({[], current_freq, freq_list}) do
-    IO.puts("Wrapping: #{current_freq}")
-    finder({Inputs.list(), current_freq, freq_list})
+  def find_repeated({[], current_freq, freq_list}) do
+    IO.puts("Wrapping...")
+    find_repeated({Inputs.list(), current_freq, freq_list})
   end
 
-  def finder({[h | t], current_freq, freq_list}) do
+  def find_repeated({[h | t], current_freq, freq_list}) do
     new_freq = h + current_freq
       if Enum.member?(freq_list, new_freq) do
         new_freq
       else
-        finder({t, new_freq, [new_freq] ++ freq_list})
+        find_repeated({t, new_freq, [new_freq] ++ freq_list})
       end
   end
 end
@@ -31,7 +33,7 @@ total = Enum.reduce(Inputs.list(), fn x, acc -> x + acc end)
 IO.puts "pt1: #{total}"
 
 # solve pt2: 
-IO.puts FreqFinder.finder({Inputs.list(), 0, [0]}) 
+IO.puts "pt2: #{FreqFinder.find_repeated({Inputs.list(), 0, [0]})} 
 
 
 
