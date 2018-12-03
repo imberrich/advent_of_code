@@ -40,12 +40,61 @@ defmodule Checksum do
   end
 
   defp multiply_count({x, y}), do: x * y
-
 end
 
+defmodule Diff do
+  # requires sorted list
+  def compare_all([]), do: nil
+  def compare_all([h | t]) do
+    case compare_to_list(h, t) do
+      nil -> compare_all(t)
+      ans -> ans
+    end
+  end
+
+  # PRIVATE
+
+  defp compare_to_list(_id, []), do: nil
+  defp compare_to_list(id, [h | t]) do
+    case compare_ids(id, h) do
+      {:not_match} -> compare_to_list(h, t)
+      {:ok, matched_diff} -> matched_diff 
+    end
+  end
+
+  defp compare_ids(id1, id2) do
+    case String.myers_difference(id1, id2) do
+      # 1 char mismatch in middle
+      [eq: start, del: del, ins: ins, eq: finish] ->
+        if myers_matcher(del, ins), do: {:ok, start <> finish} 
+
+      # 1 char mismatch at the end
+      [eq: start, del: del, ins: ins] ->
+        if myers_matcher(del, ins), do: {:ok, start}
+
+      # 1 char mismatch at the beginning
+      [del: del, ins: ins, eq: finish] ->
+        if myers_matcher(del, ins), do: {:ok, finish}
+      
+      # no mismatch or non concurrent mismatch 
+      _ -> 
+        {:not_match}
+    end
+  end
+
+  # checks to see if there is only 1 mismatched char
+  defp myers_matcher(del, ins), do: String.length(del) == 1 && String.length(ins) == 1
+end
+
+input = File.read!("input.txt") |> String.split()
+
 # pt1: what is the checksum for your list of box IDs
-"input.txt"
-|> File.read!() 
-|> String.split()
+input
 |> Checksum.calculate()
 |> IO.puts()
+
+# pt2: diff inputs to find 2 that have only 1 different char
+input
+|> Enum.sort()
+|> Diff.compare_all()
+|> IO.inspect()
